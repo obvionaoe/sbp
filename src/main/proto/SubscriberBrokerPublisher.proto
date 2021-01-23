@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "SubscriberBrokerPublisher";
+
+package pt.obvionaoe.sbp;
+
+// Subscriber
+service SubscribeBroker {
+  rpc getTags (ListTagsRequest) returns (ListTagsResponse) {}
+
+  rpc subscribe (SubscribeRequest) returns (stream TaggedMessage) {}
+}
+
+message ListTagsRequest {}
+
+message ListTagsResponse {
+  repeated string tagsList = 1;
+}
+
+message SubscribeRequest {
+  string tag = 1;
+}
+
+message TaggedMessage {
+  string publisherId = 1;
+  string message = 2;
+  string tag = 3;
+  int64 timestamp = 4;
+}
+
+// Publisher
+service PublishBroker {
+  rpc register (RegisterRequest) returns (RegisterResponse) {}
+
+  rpc publish (stream TaggedMessage) returns (PublishResponse) {}
+}
+
+message RegisterRequest {
+  string tag = 1;
+}
+
+message RegisterResponse {
+  string id = 1;
+  PublishStatus status = 2;
+}
+
+message PublishResponse {
+  PublishStatus status = 1;
+}
+
+enum PublishStatus {
+  ACCEPTED = 0;
+  FAILED = 1;
+}
